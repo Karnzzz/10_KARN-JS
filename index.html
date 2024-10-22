@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10_KARN-JS</title>
+    <!-- CSS ฺBy Ai-->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .list,
+        .cart,
+        .total,
+        .listCart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 300px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .list h4 {
+            margin-bottom: 10px;
+        }
+
+        .list label {
+            margin: 5px 0;
+        }
+
+        .list input,
+        .list button {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .showing,
+        .showingCart {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        .showingCart li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+        }
+
+        .showingCart li:hover {
+            background-color: #e0e0e0;
+        }
+
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+        .checkout {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .checkout:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="nav">Shoping CART</h1>
+
+    <div class="list">
+        <h4>Add item for selection</h4>
+        <label for="product">Product Name:</label>
+        <input type="text" id="name" placeholder="กรอกข้อมูลสินค้า" required>
+        <label for="price">Price :</label>
+        <input type="number" id="price" placeholder="กรอกราคาสินค้า" required>
+        <label for="image">Image:</label>
+        <input type="url" name="image" id="image" placeholder="ลิงค์ของรูปภาพ">
+        <button id="confirm">Add To List</button>
+    </div>
+    <!-- แสดง Product -->
+    <div class="listproduct"> My Product
+        <ul class="showing">
+
+        </ul>
+
+    </div>
+    <!-- แสดงในตระกร้า -->
+    <div class="cart">
+        <button id="addingcart"> Add To Cart</button>
+
+    </div>
+
+    <div class="listCart">
+        <ul class="showingCart">
+
+        </ul>
+
+    </div>
+
+    <!-- รวมสินค้าในตระกร้า -->
+    <div class="total" id="total">Total Price:</div>
+    <button class="checkout" id="checkout">Check out</button>
+</body>
+<!-- JS -->
+<script>
+
+    const confirmButton = document.getElementById("confirm");
+    const productList = document.querySelector('.showing');
+    // ฟังชั่น Add To list
+    confirmButton.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        const productName = document.getElementById('name').value;
+        const productPrice = document.getElementById('price').value;
+        const image = document.getElementById('image').value;
+
+        if (productName && productPrice && image) {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <input class="inp" type="checkbox" value = "${productName} ${productPrice} ${image}">
+                <label for="inp">
+                    <h5>${productName}</h5>
+                    <p>Price: ${productPrice} $</p>
+                    <img src="${image}" alt="${productName}" style="width:100px; height:auto;">
+                </label>`;
+            productList.appendChild(listItem);
+
+            document.getElementById('name').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('image').value = '';
+        }
+    });
+
+    const addCart = document.getElementById('addingcart');
+    const listCart = document.querySelector('.showingCart');    
+    let total = 0;
+    // ในตระกร้า
+
+    addCart.addEventListener('click', function (event) {
+        event.preventDefault();
+        const checkbox = document.querySelectorAll('.inp:checked');
+
+        let selectBox = [];
+
+        checkbox.forEach((check) => {
+            if (check.checked) {
+                let value = check.value.split(' ');
+                let object = {
+                    productName: value[0],
+                    price: value[1],
+                    image: value[2]
+                }
+                selectBox.push(object);
+            }
+        });
+
+        for (let i = 0; i < selectBox.length; i++) {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <h5>${selectBox[i].productName}</h5>
+                <p>Price: ${selectBox[i].price} $</p>
+                <img src="${selectBox[i].image}" alt="${selectBox[i].productName}" style="width:100px; height:auto;">
+                <button class="delete-button">Remove</button>
+            `;
+            
+            listCart.appendChild(listItem);
+
+            total += Number(selectBox[i].price)
+
+            // ลบ Product 
+            const deleteButton = listItem.querySelector('.delete-button');
+            deleteButton.addEventListener('click', function () {
+                total -= Number(selectBox[i].price)
+                updateTotal()
+                listCart.removeChild(listItem)
+            });
+        }
+        updateTotal()
+    });
+
+
+    function updateTotal() {
+        let totalPrice = document.getElementById('total');
+        totalPrice.innerText = `Total Price: ${total} $`;
+    }
+    let checkout = document.getElementById('checkout')
+    checkout.addEventListener('click', function () {
+        alert(`ดำเนินการเสร็จสิ้น ทั้งหมด ราคา ${total} !!`)
+
+    })
+</script>
+
+</html>
